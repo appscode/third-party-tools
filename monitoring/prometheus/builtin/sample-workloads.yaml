@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-monitoring-demo
+  namespace: demo
+  labels:
+    app: prometheus-demo
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9091"
+    prometheus.io/path: "/metrics"
+spec:
+  containers:
+  - name: pushgateway
+    image: prom/pushgateway
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: service-endpoint-monitoring-demo
+  namespace: demo
+  labels:
+    app: prometheus-demo
+    pod: prom-pushgateway
+spec:
+  containers:
+  - name: pushgateway
+    image: prom/pushgateway
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name:  pushgateway-service
+  namespace: demo
+  labels:
+    app: prometheus-demo
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9091"
+    prometheus.io/path: "/metrics"
+spec:
+  selector:
+    pod: prom-pushgateway
+  ports:
+  - name:  metrics
+    port:  9091
+    targetPort:  9091
