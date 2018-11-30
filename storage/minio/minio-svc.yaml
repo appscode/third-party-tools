@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: demo
+spec:
+  ports:
+  - name: https
+    port: 443
+    targetPort: https
+    protocol: TCP
+  selector:
+    app: minio # must match with the label used in minio deployment

@@ -1,0 +1,36 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: osm-pod
+  namespace: demo
+spec:
+  containers:
+  - name: osm
+    image: appscode/osm:0.8.0
+    env:
+    - name: MINIO_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-client-secret
+          key: MINIO_ACCESS_KEY
+    - name: MINIO_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-client-secret
+          key: MINIO_SECRET_KEY
+    command: [ "/bin/sh" ]
+    args:
+    - "-c"
+    # - "osm config set-context minio --provider=s3 --s3.access_key_id=$(MINIO_ACCESS_KEY) --s3.secret_key=$(MINIO_SECRET_KEY) --s3.endpoint=https://minio.demo.svc --s3.cacert_file=/etc/minio/certs/ca.crt"
+    # - "osm config current-context"
+    - "osm version && sleep 3600"
+    volumeMounts:
+    - name: credentials
+      mountPath: /etc/minio/certs
+  volumes:
+  - name: credentials
+    secret:
+      secretName:  minio-client-secret
+      items:
+      - key: ca.crt
+        path: ca.crt
