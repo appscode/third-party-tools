@@ -4,27 +4,30 @@ metadata:
   name: osm-pod
   namespace: demo
 spec:
+  restartPolicy: Never
   containers:
   - name: osm
-    image: appscode/osm:0.8.0
+    image: appscodeci/osm
     env:
-    - name: MINIO_ACCESS_KEY
+    - name: PROVIDER
+      value: s3
+    - name: AWS_ENDPOINT
+      value: https://minio.demo.svc
+    - name: AWS_ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:
           name: minio-client-secret
-          key: MINIO_ACCESS_KEY
-    - name: MINIO_SECRET_KEY
+          key: AWS_ACCESS_KEY_ID
+    - name: AWS_SECRET_ACCESS_KEY
       valueFrom:
         secretKeyRef:
           name: minio-client-secret
-          key: MINIO_SECRET_KEY
-    command: [ "/bin/sh" ]
+          key: AWS_SECRET_ACCESS_KEY
+    - name: CA_CERT_FILE
+      value: /etc/minio/certs/ca.crt # root ca has been mounted here
     args:
-    - "-c"
-    # - "osm config set-context minio --provider=s3 --s3.access_key_id=$(MINIO_ACCESS_KEY) --s3.secret_key=$(MINIO_SECRET_KEY) --s3.endpoint=https://minio.demo.svc --s3.cacert_file=/etc/minio/certs/ca.crt"
-    # - "osm config current-context"
-    - "osm version && sleep 3600"
-    volumeMounts:
+    - "mc internal-bucket" # create a bucket named "internal-bucket"
+    volumeMounts: # mount root ca in /etc/minio/certs directory
     - name: credentials
       mountPath: /etc/minio/certs
   volumes:

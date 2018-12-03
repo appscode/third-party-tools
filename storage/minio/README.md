@@ -1,14 +1,14 @@
 # Deploy TLS Secured Minio Server in Kubernetes
 
-[Minio](https://minio.io/) is an open source object storage server compatible with [Amazon S3](https://aws.amazon.com/s3/) cloud storage service. You can deploy Minio server in docker container, locally, in a Kubernetes cluster, Microsoft Azure, GCP etc.
+[Minio](https://minio.io/) is an open source object storage server compatible with [Amazon S3](https://aws.amazon.com/s3/) cloud storage service. You can deploy Minio server in docker container, locally, Kubernetes cluster, Microsoft Azure, GCP etc.
 
-This tutorial will show you how to deploy a TLS secured Minio server in Kubernetes. This will also show you how to access this TLS secured Minio server both from inside and outside the Kubernetes cluster.
+This tutorial will show you how to deploy a TLS secured Minio server in Kubernetes. This will also show you how to access this TLS secured Minio server both from inside and outside of the Kubernetes cluster.
 
 >You will find official guides for using Minio server at [here](https://docs.minio.io/).
 
 ## Before You Begin
 
-At first, you need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
+At first, you need to have a Kubernetes cluster, and the `kubectl` command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
 
 To keep things isolated, we will use a separate namespace called `demo` throughout this tutorial.
 
@@ -19,13 +19,13 @@ namespace/demo created
 
 ## Generate self-signed  Certificate
 
-TLS is crucial to secure your production services over the web. Usually, a certificate issued by trusted third party known as [Certificate Authority](https://en.wikipedia.org/wiki/Certificate_authority) is used for TLS secure connection. However, we can also use a self-signed certificate. In this tutorial, we will use self-signed certificate to secure a Minio server.
+TLS is crucial to secure your production services over the web. Usually, a certificate issued by a trusted third party known as [Certificate Authority](https://en.wikipedia.org/wiki/Certificate_authority) is used for TLS secured application. However, we can also use a self-signed certificate. In this tutorial, we will use self-signed certificate to secure a Minio server.
 
-We will use a tool called [onessl](https://github.com/kubepack/onessl) developed by [AppsCode](https://appscode.com/) to generate self signed certificate. `onessl` makes generating self-signed certificate very easy and matter of two or theree commands. If you already don't have `onessl` installed, please install it first from [here](https://github.com/kubepack/onessl/releases).
+We will use a tool called [onessl](https://github.com/kubepack/onessl) developed by [AppsCode](https://appscode.com/) to generate self signed certificate. `onessl` makes generating self-signed certificate very easy and matter of two or three commands. If you already don't have `onessl` installed, please install it first from [here](https://github.com/kubepack/onessl/releases).
 
 **Generate Root CA :**
 
-At first, lets generate root certificate,
+At first, let's generate root certificate,
 
 ```console
 $ onessl create ca-cert
@@ -37,7 +37,7 @@ This will create two files `ca.crt` and `ca.key` in your working directory. This
 
 Now, we will generate server certificate using the root certificate. Now, we have to provide the `domain` or `ip address` for which this certificate will be valid.
 
-We want to access Minio server both from inside and outside cluster. In order to access Minio from inside cluster, we will use a service named `minio` in `demo` namespace. So, our domain will be `minio.demo.svc`. To access Minio from outside of cluster through `NodePort`, we will need Cluster's IP address. As I am using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.demo.svc` domain and `198.168.99.100` ip address.
+We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `demo` namespace. So, our domain will be `minio.demo.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As I am using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.demo.svc` domain and `198.168.99.100` ip address.
 
 Let's create server certificates,
 
@@ -51,7 +51,7 @@ This will generate two files `server.crt` and `server.key`.
 
 **Prepare Certificates for Minio Server :**
 
-Minio server will start TLS secure service if it find `public.crt` and `private.key` files in `/root/.minio/certs/` directory of the docker container. The `public.crt` file is concatenation of `server.crt` and `ca.crt` where `private.key` file is only the `server.key` file.
+Minio server will start TLS secure service if it find `public.crt` and `private.key` files in `/root/.minio/certs/` directory of the container. The `public.crt` file is concatenation of `server.crt` and `ca.crt` where `private.key` file is only the `server.key` file.
 
 Let's generate `public.crt` and `private.key` file,
 
@@ -228,7 +228,7 @@ NAME                                READY   STATUS    RESTARTS   AGE
 minio-deployment-7d4c847d9d-8trcr   1/1     Running   0          13m
 ```
 
-Now, run following command on a separate terminal to forward `8443` port of `minio-deployment-7d4c847d9d-8trcr` pod,
+Now, run following command on a separate terminal to forward `:443` port of `minio-deployment-7d4c847d9d-8trcr` pod,
 
 ```console
 $ kubectl port-forward -n demo minio-deployment-7d4c847d9d-8trcr :443
@@ -238,19 +238,19 @@ Forwarding from [::1]:37817 -> 443
 
 Our host port `31817` has been forward to `:443` port of the pod. Now, we can access the dashboard at `https://localhost:31817`. Open the url in your to access Minio Web UI.
 
-As we are using self-signed certificate, the browser will not trust it. If you are using Google Chrome browser, you will be greeted with following messege,
+As we are using self-signed certificate, the browser will not trust it. If you are using Google Chrome browser, you will be greeted with following message,
 
 <p align="center">
   <img alt="Warning: Your connection is not private" src="/storage/minio/images/minio-1.png" style="padding:10px">
 </p>
 
-Click on `ADVANCED` marked by red rectangle in the above image. Then click on `Proceed to localhost(unsafe)` as marked in below image.
+Click on `ADVANCED` marked by a red rectangle in the above image. Then click on `Proceed to localhost(unsafe)` as marked in below image.
 
 <p align="center">
   <img alt="Proceed to localhost(unsafe)" src="/storage/minio/images/minio-2.png" style="padding:10px">
 </p>
 
-Then, you will be taken to Minio Login UI. Login with your `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`. If you succeed, you will see below UI,
+Then, you will be taken to Minio Login UI. Log in with your `MINIO_ACCESS_KEY` and `MINIO_SECRET_KEY`. If you succeed, you will see below UI,
 
 <p align="center">
   <img alt="Mino Web UI" src="/storage/minio/images/minio-3.png" style="padding:10px">
@@ -258,11 +258,11 @@ Then, you will be taken to Minio Login UI. Login with your `MINIO_ACCESS_KEY` an
 
 ## Accessing TLS Secured Minio Server
 
-This section will show you how to access the TLS secured Minio server we have deployed above from both inside and outside of the Kubernetes cluster. We will use a tool called [osm](https://github.com/appscode/osm) developed by [AppsCode](https://appscode.com/) that gives simple and easy way interact with various cloud storage service.
+This section will show you how to access the TLS secured Minio server we have deployed above from both inside and outside of the Kubernetes cluster. We will use a tool called [osm](https://github.com/appscode/osm) developed by [AppsCode](https://appscode.com/) that gives simple and easy way to interact with various cloud storage services.
 
 ### Accessing from Outside of Cluster
 
-Althugh we have already accessed the Minio Web UI from a browser that runs outside of the cluster, it did not used TLS secured connection. In this section, we will show how a application can access the Minio server with TLS secured connection.
+Althugh we have already accessed the Minio Web UI from a browser that runs outside of the cluster, it did not used TLS secured connection. In this section, we will show how an application can access the Minio server with TLS secured connection.
 
 Here, we will use [osm](https://github.com/appscode/osm) command line binary to interact with the Minio server. If you haven't installed `osm` already, please install it first.
 
@@ -306,9 +306,9 @@ Notice the `PORT(S)` field. Here, `32733` is the allocated `NodePort` for this s
 
 **Connect with Minio Server :**
 
-Now, let's use `osm` create bucket and upload some files to the Minio server.
+Now, let's use `osm` to create bucket and upload some files to the Minio server.
 
-At first, create `osm` configuration for the Minio server. `osm` configuration holds the connection information to the cloud bucket. So, every time you will run a operation, you don't have to provide the them again.
+At first, create `osm` configuration for the Minio server. `osm` configuration holds the connection information of the cloud bucket. So, every time you will run an operation, you don't have to provide the them again.
 
 For `s3` compatible Minio server, we have to provide following connection information while creating the `osm` configuration.
 
@@ -334,6 +334,7 @@ minio
 Let's create a bucket named `external-bucket` in our Minio server,
 
 ```console
+# Here, mc = make container
 $ osm mc external-bucket
 Successfully created container external-bucket
 ```
@@ -341,12 +342,13 @@ Successfully created container external-bucket
 Check the bucket has been created successfully by,
 
 ```console
+# Here, lc = list container
 $ osm lc
 external-bucket
 Found 1 container in
 ```
 
-You can also check in the Minio Web UI to see if bucket has been created.
+You can also check in the Minio Web UI to see if the bucket has been created.
 
 <p align="center">
   <img alt="Mino UI: external-bucket" src="/storage/minio/images/external-bucket.png" style="padding:10px">
@@ -367,7 +369,7 @@ deployment.yaml
 Found 1 item in container external-bucket
 ```
 
-You can also brows the Web UI to see if the files are present in `external-bucket`
+You can also browse the Web UI to see if the files are present in `external-bucket`
 
 <p align="center">
   <img alt="Mino Web UI: files in external-bucket" src="/storage/minio/images/external-bucket-file.png" style="padding:10px">
@@ -375,7 +377,7 @@ You can also brows the Web UI to see if the files are present in `external-bucke
 
 **Try Without Certificates :**
 
-Now, let's try to connect with Minio server without certificates. Let's create another osm configuration that doesn't provide certificate. This time we will not provide `--s3.cacert_file=./ca.crt` flag while creating `osm` configuration.
+Now, let's try to connect with the Minio server without certificates. Let's create another osm configuration that doesn't provide certificate. This time we will not provide `--s3.cacert_file=./ca.crt` flag while creating `osm` configuration.
 
 ```console
 $ osm config set-context minio-not-ca --provider=s3 --s3.access_key_id=my-access-key --s3.secret_key=my-secret-key --s3.endpoint=192.168.99.100:32733
@@ -434,16 +436,104 @@ We will create a Secret with credentials to access the Minio server and the root
 Let's create the client secret,
 
 ```console
-$ echo -n '<your-minio-access-key>' > MINIO_ACCESS_KEY
-$ echo -n '<your-minio-secret-key>' > MINIO_SECRET_KEY
+$ echo -n '<your-minio-access-key>' > AWS_ACCESS_KEY_ID
+$ echo -n '<your-minio-secret-key>' > AWS_SECRET_ACCESS_KEY
 
 $ kubectl create secret generic -n demo minio-client-secret \
-    --from-file=./MINIO_ACCESS_KEY \
-    --from-file=./MINIO_SECRET_KEY \
+    --from-file=./AWS_ACCESS_KEY_ID \
+    --from-file=./AWS_SECRET_ACCESS_KEY \
     --from-file=./ca.crt
 secret/minio-client-secret created
 ```
 
 **Create Pod :**
 
+Now, let's create a simple pod that will create a bucket named `internal-bucket` in the Minio server. This time, we will use [appscodeci/osm](https://hub.docker.com/r/appscodeci/osm/) docker image that is created from same `osm` binary we have used earlier.
+
+Below the YAML for simple `osm-pod` that will just create a bucket named `internal-bucket` in Minio server then will go to `Complted` state.
+
+```yaml
+kind: Pod
+apiVersion: v1
+metadata:
+  name: osm-pod
+  namespace: demo
+spec:
+  restartPolicy: Never
+  containers:
+  - name: osm
+    image: appscodeci/osm
+    env:
+    - name: PROVIDER
+      value: s3
+    - name: AWS_ENDPOINT
+      value: https://minio.demo.svc
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: minio-client-secret
+          key: AWS_ACCESS_KEY_ID
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-client-secret
+          key: AWS_SECRET_ACCESS_KEY
+    - name: CA_CERT_FILE
+      value: /etc/minio/certs/ca.crt # root ca has been mounted here
+    args:
+    - "mc internal-bucket" # create a bucket named "internal-bucket"
+    volumeMounts: # mount root ca in /etc/minio/certs directory
+    - name: credentials
+      mountPath: /etc/minio/certs
+  volumes:
+  - name: credentials
+    secret:
+      secretName:  minio-client-secret
+      items:
+      - key: ca.crt
+        path: ca.crt
+```
+
+Let's create the above pod,
+
+```console
+$ kubectl apply -f ./osm-pod.yaml
+pod/osm-pod created
+```
+
+Now, wait for the pod to go in `Running` state. Once, it is in `Running` state, it will create a bucket in the Minio server.
+
+You can check the pod's log to see if the bucket was created successfully.
+
+```console
+$ kubectl logs -n demo osm-pod -f
+Configuring osm context for s3 storage
+osm config set-context s3 --provider=s3 --s3.access_key_id=my-access-key --s3.secret_key=my-secret-key --s3.endpoint=https://minio.demo.svc --s3.cacert_file=/etc/minio/certs/ca.crt
+Successfully configured
+
+Running main command.....
+osm mc internal-bucket
+Successfully created container internal-bucket
+```
+
+You can also check Minio Web UI to ensure that the bucket is showing there.
+
+<p align="center">
+  <img alt="Mino Web UI: internal-bucket" src="/storage/minio/images/internal-bucket.png" style="padding:10px">
+</p>
+
 ## Cleanup
+
+To cleanup the Kubernetes resources created by this tutorial run following commands,
+
+```console
+kubectl delete -n demo secret/minio-server-secret
+kubectl delete -n demo deployment/minio-deployment
+kubectl delete -n demo persistentvolumeclaim/minio-pvc
+kubectl delete -n demo service/minio-nodeport-svc
+kubectl delete -n demo service/minio
+kubectl delete -n demo secret/minio-client-secret
+kubectl delete -n demo pod/osm-pod
+
+kubectl delete ns demo
+```
