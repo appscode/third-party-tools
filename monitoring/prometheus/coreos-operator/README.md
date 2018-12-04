@@ -16,7 +16,7 @@ namespace/demo created
 If you are using an RBAC enabled cluster, you have to give necessary permissions to Prometheus operator. Let's create necessary RBAC stuff.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/coreos-operator/operator-rbac.yaml
+$ kubectl apply -f ./monitoring/prometheus/coreos-operator/artifacts/operator-rbac.yaml
 clusterrole.rbac.authorization.k8s.io/prometheus-operator created
 serviceaccount/prometheus-operator created
 clusterrolebinding.rbac.authorization.k8s.io/prometheus-operator created
@@ -114,7 +114,7 @@ subjects:
 Now, we can deploy Prometheus operator. Create operator Deployment using following command,
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/coreos-operator/operator.yaml
+$ kubectl apply -f ./monitoring/prometheus/coreos-operator/artifacts/operator.yaml
 deployment.apps/prometheus-operator created
 ```
 
@@ -179,7 +179,7 @@ Prometheus operator watches for `Prometheus` crd. Once a `Prometheus` crd is cre
 If you are using an RBAC enabled cluster, create following RBAC resources for Prometheus crd.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/coreos-operator/prometheus-rbac.yaml
+$ kubectl apply -f ./monitoring/prometheus/coreos-operator/artifacts/prometheus-rbac.yaml
 clusterrole.rbac.authorization.k8s.io/prometheus created
 serviceaccount/prometheus created
 clusterrolebinding.rbac.authorization.k8s.io/prometheus created
@@ -265,7 +265,7 @@ This Prometheus crd will select all ServiceMonitor in `demo` namespace which has
 Let's create the `Prometheus` crd we have shown above,
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/coreos-operator/prometheus.yaml
+$ kubectl apply -f ./monitoring/prometheus/coreos-operator/artifacts/prometheus.yaml
 prometheus.monitoring.coreos.com/prometheus created
 ```
 

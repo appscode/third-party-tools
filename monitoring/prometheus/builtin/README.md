@@ -397,44 +397,44 @@ As we have configured `prometheus.yaml` to collect metrics from the targets. We 
 At first, let's create the sample pods and service we have shown earlier so that we can verify our configured scrapping job for `kubernetes-pod` and `kubernetes-service-endpoints` are working.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/sample-workloads.yaml
+$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/sample-workloads.yaml
 pod/pod-monitoring-demo created
 pod/service-endpoint-monitoring-demo created
 service/pushgateway-service created
 ```
 
->YAML for sample workloads can be found [here](/monitoring/prometheus/builtin/sample-workloads.yaml).
+>YAML for sample workloads can be found [here](/monitoring/prometheus/builtin/artifacts/sample-workloads.yaml).
 
 **Create ConfigMap:**
 
 Now, we have to create a ConfigMap with the configuration (`prometheus.yaml`) file. We will mount this into Prometheus Deployment.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/configmap.yaml
+$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/configmap.yaml
 configmap/prometheus-config created
 ```
 
->YAML for the ConfigMap can be found [here](/monitoring/prometheus/builtin/configmap.yaml).
+>YAML for the ConfigMap can be found [here](/monitoring/prometheus/builtin/artifacts/configmap.yaml).
 
 **Create RBAC resources:**
 
 If you are using a RBAC enabled cluster, you have to give necessary permissions to Prometheus server. Let's create the necessary RBAC resources,
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/rbac.yaml
+$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/rbac.yaml
 clusterrole.rbac.authorization.k8s.io/prometheus created
 serviceaccount/prometheus created
 clusterrolebinding.rbac.authorization.k8s.io/prometheus created
 ```
 
->YAML for RBAC resources can be found [here](/monitoring/prometheus/builtin/rbac.yaml).
+>YAML for RBAC resources can be found [here](/monitoring/prometheus/builtin/artifacts/rbac.yaml).
 
 **Create Deployment:**
 
 Finally, let's deploy the Prometheus server.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/deployment.yaml
+$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/deployment.yaml
 deployment.apps/prometheus created
 ````
 
@@ -506,7 +506,7 @@ Forwarding from [::1]:9090 -> 9090
 Now, we can access the dashboard at `localhost:9090`. Open [http://localhost:9090](http://localhost:9090) in your browser. You should see the configured jobs as target and they are in `UP` state which means Prometheus is able collect metrics from them.
 
 <p align="center">
-  <img alt="Prometheus Target" src="/monitoring/prometheus/builtin/prom-targets.png" style="padding:10px">
+  <img alt="Prometheus Target" src="/monitoring/prometheus/builtin/images/prom-targets.png" style="padding:10px">
 </p>
 
 ## Cleanup
