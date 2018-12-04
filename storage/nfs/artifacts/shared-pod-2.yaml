@@ -1,0 +1,20 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: shared-pod-2
+  namespace: demo
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command:
+    - sleep
+    - "3600"
+    volumeMounts:
+    - name: data
+      mountPath: /demo/data
+  volumes:
+  - name: data
+    nfs:
+      server: "10.98.52.204"
+      path: "/shared" # "shared" folder must exist inside "/exports" directory of NFS server
