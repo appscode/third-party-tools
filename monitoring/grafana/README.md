@@ -39,7 +39,7 @@ spec:
 Let's create the deployment we have shown above,
 
 ```console
-$ kubectl apply -f ./monitoring/grafana/artifacts/grafana.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/grafana/artifacts/grafana.yaml
 deployment.apps/grafana created
 ```
 

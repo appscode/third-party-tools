@@ -115,7 +115,7 @@ type: Opaque
 Minio server needs a Persistent Volume to store data. Let's create a [PersistentVolumeClaim](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) to request Persistent Volume from the cluster.
 
 ```console
-$ kubectl apply -f ./storage/minio/artifacts/pvc.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/pvc.yaml
 persistentvolumeclaim/minio-pvc created
 ```
 
@@ -149,7 +149,7 @@ minio-pvc   Bound    pvc-3842dfb9-f460-11e8-ae3b-0800279630e8   5Gi        RWO  
 Now, let's create deployment for Minio server,
 
 ```console
-$ kubectl apply -f ./storage/minio/artifacts/deployment.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/deployment.yaml
 deployment.apps/minio-deployment created
 ```
 
@@ -271,7 +271,7 @@ Here, we will use [osm](https://github.com/appscode/osm) command line binary to 
 We need a `NodePort` type service so that we can access the Minio server from outside of the cluster. Let's create a `NodePort` type Service first,
 
 ```console
-$ kubectl apply -f ./storage/minio/artifacts/nodeport-svc.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/nodeport-svc.yaml
 service/minio-nodeport-svc created
 ```
 
@@ -407,7 +407,7 @@ Now, we will show how to connect with the Minio server from inside the Kubernete
 We have used `minio.demo.svc` domain while generating the self-signed certificates. So, our certificate is valid for a Service named `minio` in `demo` namespace. Let's create the service first,
 
 ```console
-$ kubectl apply -f ./storage/minio/artifacts/minio-svc.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/minio-svc.yaml
 service/minio created
 ```
 
@@ -497,7 +497,7 @@ spec:
 Let's create the above pod,
 
 ```console
-$ kubectl apply -f ./osm-pod.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/osm-pod.yaml
 pod/osm-pod created
 ```
 

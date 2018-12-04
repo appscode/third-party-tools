@@ -397,7 +397,7 @@ As we have configured `prometheus.yaml` to collect metrics from the targets. We 
 At first, let's create the sample pods and service we have shown earlier so that we can verify our configured scrapping job for `kubernetes-pod` and `kubernetes-service-endpoints` are working.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/sample-workloads.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/builtin/artifacts/sample-workloads.yaml
 pod/pod-monitoring-demo created
 pod/service-endpoint-monitoring-demo created
 service/pushgateway-service created
@@ -410,7 +410,7 @@ service/pushgateway-service created
 Now, we have to create a ConfigMap with the configuration (`prometheus.yaml`) file. We will mount this into Prometheus Deployment.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/configmap.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/builtin/artifacts/configmap.yaml
 configmap/prometheus-config created
 ```
 
@@ -421,7 +421,7 @@ configmap/prometheus-config created
 If you are using a RBAC enabled cluster, you have to give necessary permissions to Prometheus server. Let's create the necessary RBAC resources,
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/rbac.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/builtin/artifacts/rbac.yaml
 clusterrole.rbac.authorization.k8s.io/prometheus created
 serviceaccount/prometheus created
 clusterrolebinding.rbac.authorization.k8s.io/prometheus created
@@ -434,7 +434,7 @@ clusterrolebinding.rbac.authorization.k8s.io/prometheus created
 Finally, let's deploy the Prometheus server.
 
 ```console
-$ kubectl apply -f ./monitoring/prometheus/builtin/artifacts/deployment.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/builtin/artifacts/deployment.yaml
 deployment.apps/prometheus created
 ````
 

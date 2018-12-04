@@ -67,7 +67,7 @@ Here, we have mounted `/data/nfs` directory of the host as `storage` volume in `
 Let's create the deployment we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-server.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-server.yaml
 deployment.apps/nfs-server created
 ```
 
@@ -98,7 +98,7 @@ spec:
 Let's create the Service we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-service.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-service.yaml
 service/nfs-service created
 ```
 
@@ -166,7 +166,7 @@ nfs-direct
 Now, let's create the pod we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-direct.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-direct.yaml
 pod/nfs-direct created
 ```
 
@@ -227,7 +227,7 @@ pvc
 Now, let's create the `PersistentVolume` we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-pv.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-pv.yaml
 persistentvolume/nfs-pv created
 ```
 
@@ -255,7 +255,7 @@ spec:
 Let's create the PVC we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-pvc.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-pvc.yaml
 persistentvolumeclaim/nfs-pvc created
 ```
 
@@ -300,7 +300,7 @@ Here, we have mounted PVC `nfs-pvc` into `/demo/data` directory. Now, if we writ
 Let's create the pod we have shown above,
 
 ```console
-$ kubectl apply -f ./storage/nfs/artifacts/nfs-pod-pvc.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-pod-pvc.yaml
 pod/nfs-pod-pvc created
 ```
 
@@ -376,11 +376,11 @@ Now, let's create two pod with this configuration.
 
 ```console
 # create shared-pod-1
-$ kubectl apply -f ./storage/nfs/artifacts/shared-pod-1.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/shared-pod-1.yaml
 pod/shared-pod-1 created
 
 # create shared-pod-2
-$ kubectl apply -f ./storage/nfs/artifacts/shared-pod-2.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/shared-pod-2.yaml
 pod/shared-pod-2 created
 ```
 
