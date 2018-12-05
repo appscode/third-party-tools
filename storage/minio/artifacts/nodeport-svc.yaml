@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: minio-nodeport-svc
-  namespace: demo
+  namespace: storage
 spec:
   type: NodePort
   ports:

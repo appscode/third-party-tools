@@ -2,11 +2,11 @@
 
 CoreOS [prometheus-operator](https://github.com/coreos/prometheus-operator) provides simple and kubernetes native way to deploy and configure Prometheus server. This tutorial will show you how to deploy CoreOS prometheus-operator. You can also follow the official docs to deploy Prometheus operator from [here](https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/getting-started.md).
 
-To keep Prometheus resources isolated, we will use a separate namespace to deploy Prometheus operator and respective resources.
+To keep Prometheus resources isolated, we will use a separate namespace `monitoring` to deploy Prometheus operator and respective resources.
 
 ```console
-$ kubectl create ns demo
-namespace/demo created
+$ kubectl create ns monitoring
+namespace/monitoring created
 ```
 
 ## Deploy Prometheus Operator
@@ -89,7 +89,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus-operator
-  namespace: demo
+  namespace: monitoring
 ```
 
 **ClusterRoleBinding:**
@@ -106,7 +106,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus-operator
-  namespace: demo
+  namespace: monitoring
 ```
 
 #### Create Deployment
@@ -127,7 +127,7 @@ metadata:
   labels:
     k8s-app: prometheus-operator
   name: prometheus-operator
-  namespace: demo
+  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -163,7 +163,7 @@ spec:
 Wait for Prometheus operator pod to be ready,
 
 ```console
-$ kubectl get pods -n demo -l k8s-app=prometheus-operator
+$ kubectl get pods -n monitoring -l k8s-app=prometheus-operator
 NAME                                   READY   STATUS    RESTARTS   AGE
 prometheus-operator-589fcd78c4-8fhks   1/1     Running   0          5m30s
 ```
@@ -217,7 +217,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: prometheus
-  namespace: demo
+  namespace: monitoring
 ```
 
 **ClusterRoleBinding:**
@@ -234,7 +234,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: prometheus
-  namespace: demo
+  namespace: monitoring
 ```
 
 #### Create Prometheus CRD
@@ -246,7 +246,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
   name: prometheus
-  namespace: demo
+  namespace: monitoring # use same namespace as ServiceMonitor crd
   labels:
     prometheus: prometheus
 spec:
@@ -260,7 +260,9 @@ spec:
       memory: 400Mi
 ```
 
-This Prometheus crd will select all ServiceMonitor in `demo` namespace which has  `k8s-app: prometheus` label.
+This Prometheus crd will select all ServiceMonitor in `monitoring` namespace which has  `k8s-app: prometheus` label.
+
+> You have to deploy Prometheus crd in the same namespace as ServiceMonitor crd
 
 Let's create the `Prometheus` crd we have shown above,
 
@@ -272,7 +274,7 @@ prometheus.monitoring.coreos.com/prometheus created
 Now, wait for few seconds. Prometheus operator will create a StatefulSet. Let's check StatefulSet has been created,
 
 ```console
-$ kubectl get statefulset -n demo
+$ kubectl get statefulset -n monitoring
 NAME                    DESIRED   CURRENT   AGE
 prometheus-prometheus   1         1         87s
 ```
@@ -280,7 +282,7 @@ prometheus-prometheus   1         1         87s
 Check StatefulSet's pod is running,
 
 ```console
-$ kubectl get pod prometheus-prometheus-0 -n demo
+$ kubectl get pod prometheus-prometheus-0 -n monitoring
 NAME                      READY   STATUS    RESTARTS   AGE
 prometheus-prometheus-0   2/2     Running   0          6m
 ```
@@ -288,7 +290,7 @@ prometheus-prometheus-0   2/2     Running   0          6m
 Prometheus server is running on port `9090`. Now, we are ready to access Prometheus dashboard. We can use `NodePort` type service to access Prometheus server. In this tutorial, we will use [port forwarding](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/) to access Prometheus dashboard. Run following command on a separate terminal,
 
 ```console
-$ kubectl port-forward -n demo prometheus-prometheus-0 9090
+$ kubectl port-forward -n monitoring prometheus-prometheus-0 9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
 ```
@@ -301,18 +303,18 @@ To cleanup the Kubernetes resources created by this tutorial, run:
 
 ```console
 # cleanup prometheus resources
-kubectl delete -n demo prometheus prometheus
-kubectl delete -n demo clusterrolebinding prometheus
-kubectl delete -n demo clusterrole prometheus
-kubectl delete -n demo serviceaccount prometheus
-kubectl delete -n demo service prometheus-operated
+kubectl delete -n monitoring prometheus prometheus
+kubectl delete -n monitoring clusterrolebinding prometheus
+kubectl delete -n monitoring clusterrole prometheus
+kubectl delete -n monitoring serviceaccount prometheus
+kubectl delete -n monitoring service prometheus-operated
 
 # cleanup prometheus operator resources
-kubectl delete -n demo deployment prometheus-operator
+kubectl delete -n monitoring deployment prometheus-operator
 kubectl delete -n dmeo serviceaccount prometheus-operator
 kubectl delete clusterrolebinding prometheus-operator
 kubectl delete clusterrole prometheus-operator
 
 # delete namespace
-kubectl delete ns demo
+kubectl delete ns monitoring
 ```

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio-pvc
-  namespace: demo
+  namespace: storage
 spec:
   storageClassName: standard
   accessModes:

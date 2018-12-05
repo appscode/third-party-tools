@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio-deployment
-  namespace: demo
+  namespace: storage
   labels:
     app: minio
 spec:

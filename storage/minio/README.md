@@ -10,9 +10,12 @@ This tutorial will show you how to deploy a TLS secured Minio server in Kubernet
 
 At first, you need to have a Kubernetes cluster, and the `kubectl` command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
 
-To keep things isolated, we will use a separate namespace called `demo` throughout this tutorial.
+To keep Minio resources isolated, we will use a separate namespace called `storage` throughout this tutorial. We will also use another seperate namespace called `demo` to deploy sample workloads.
 
 ```console
+$ kubectl create ns storage
+namespace/storage created
+
 $ kubectl create ns demo
 namespace/demo created
 ```
@@ -37,12 +40,12 @@ This will create two files `ca.crt` and `ca.key` in your working directory. This
 
 Now, we will generate server certificate using the root certificate. Now, we have to provide the `domain` or `ip address` for which this certificate will be valid.
 
-We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `demo` namespace. So, our domain will be `minio.demo.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As I am using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.demo.svc` domain and `198.168.99.100` ip address.
+We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `storage` namespace. So, our domain will be `minio.storage.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As I am using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.storage.svc` domain and `198.168.99.100` ip address.
 
 Let's create server certificates,
 
 ```console
-$ onessl create server-cert --domains minio.demo.svc --ips 192.168.99.100
+$ onessl create server-cert --domains minio.storage.svc --ips 192.168.99.100
 ```
 
 This will generate two files `server.crt` and `server.key`.
@@ -78,7 +81,7 @@ Now, let's create a secret `minio-server-secret` with  credentials `MINIO_ACCESS
 $ echo -n '<your-minio-access-key>' > MINIO_ACCESS_KEY
 $ echo -n '<your-minio-secret-key>' > MINIO_SECRET_KEY
 
-$ kubectl create secret generic -n demo minio-server-secret \
+$ kubectl create secret generic -n storage minio-server-secret \
     --from-file=./MINIO_ACCESS_KEY \
     --from-file=./MINIO_SECRET_KEY \
     --from-file=./public.crt \
@@ -89,7 +92,7 @@ secret/minio-server-secret created
 Now, verify that the credentials and certificate data are present in the secret,
 
 ```console
-$ kubectl get secret -n demo minio-server-secret -o yaml
+$ kubectl get secret -n storage minio-server-secret -o yaml
 ```
 
 ```yaml
@@ -103,9 +106,9 @@ kind: Secret
 metadata:
   creationTimestamp: 2018-11-30T05:17:54Z
   name: minio-server-secret
-  namespace: demo
+  namespace: storage
   resourceVersion: "7057"
-  selfLink: /api/v1/namespaces/demo/secrets/minio-server-secret
+  selfLink: /api/v1/namespaces/storage/secrets/minio-server-secret
   uid: 4a4c0365-f45f-11e8-ae3b-0800279630e8
 type: Opaque
 ```
@@ -126,7 +129,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio-pvc
-  namespace: demo
+  namespace: storage
 spec:
   storageClassName: standard
   accessModes:
@@ -139,7 +142,7 @@ spec:
 Verify that the cluster has provisioned the claimed volume
 
 ```console
-$ kubectl get pvc -n demo minio-pvc
+$ kubectl get pvc -n storage minio-pvc
 NAME        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 minio-pvc   Bound    pvc-3842dfb9-f460-11e8-ae3b-0800279630e8   5Gi        RWO            standard       53s
 ```
@@ -160,7 +163,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio-deployment
-  namespace: demo
+  namespace: storage
   labels:
     app: minio
 spec:
@@ -223,7 +226,7 @@ Minio server is running on port `:443`. We will use [port forwarding](https://ku
 At first, let's check if the Minio pod is in `Running` state.
 
 ```console
-$ kubectl get pod -n demo -l=app=minio
+$ kubectl get pod -n storage -l=app=minio
 NAME                                READY   STATUS    RESTARTS   AGE
 minio-deployment-7d4c847d9d-8trcr   1/1     Running   0          13m
 ```
@@ -231,7 +234,7 @@ minio-deployment-7d4c847d9d-8trcr   1/1     Running   0          13m
 Now, run following command on a separate terminal to forward `:443` port of `minio-deployment-7d4c847d9d-8trcr` pod,
 
 ```console
-$ kubectl port-forward -n demo minio-deployment-7d4c847d9d-8trcr :443
+$ kubectl port-forward -n storage minio-deployment-7d4c847d9d-8trcr :443
 Forwarding from 127.0.0.1:37817 -> 443
 Forwarding from [::1]:37817 -> 443
 ```
@@ -282,7 +285,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: minio-nodeport-svc
-  namespace: demo
+  namespace: storage
 spec:
   type: NodePort
   ports:
@@ -297,7 +300,7 @@ spec:
 We need to know the `NodePort` allocated for this service.
 
 ```console
-$ kubectl get service -n demo minio-nodeport-svc
+$ kubectl get service -n storage minio-nodeport-svc
 NAME                 TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE
 minio-nodeport-svc   NodePort   10.108.252.121   <none>        443:32733/TCP   6m53s
 ```
@@ -404,7 +407,7 @@ Now, we will show how to connect with the Minio server from inside the Kubernete
 
 **Create ClusterIP type Service :**
 
-We have used `minio.demo.svc` domain while generating the self-signed certificates. So, our certificate is valid for a Service named `minio` in `demo` namespace. Let's create the service first,
+We have used `minio.storage.svc` domain while generating the self-signed certificates. So, our certificate is valid for a Service named `minio` in `storage` namespace. Let's create the service first,
 
 ```console
 $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/minio/artifacts/minio-svc.yaml
@@ -418,7 +421,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: minio
-  namespace: demo
+  namespace: storage
 spec:
   ports:
   - name: https
@@ -467,7 +470,7 @@ spec:
     - name: PROVIDER
       value: s3
     - name: AWS_ENDPOINT
-      value: https://minio.demo.svc
+      value: https://minio.storage.svc
     - name: AWS_ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:
@@ -508,7 +511,7 @@ You can check the pod's log to see if the bucket was created successfully.
 ```console
 $ kubectl logs -n demo osm-pod -f
 Configuring osm context for s3 storage
-osm config set-context s3 --provider=s3 --s3.access_key_id=my-access-key --s3.secret_key=my-secret-key --s3.endpoint=https://minio.demo.svc --s3.cacert_file=/etc/minio/certs/ca.crt
+osm config set-context s3 --provider=s3 --s3.access_key_id=my-access-key --s3.secret_key=my-secret-key --s3.endpoint=https://minio.storage.svc --s3.cacert_file=/etc/minio/certs/ca.crt
 Successfully configured
 
 Running main command.....
@@ -527,13 +530,14 @@ You can also check Minio Web UI to ensure that the bucket is showing there.
 To cleanup the Kubernetes resources created by this tutorial run following commands,
 
 ```console
-kubectl delete -n demo secret/minio-server-secret
-kubectl delete -n demo deployment/minio-deployment
-kubectl delete -n demo persistentvolumeclaim/minio-pvc
-kubectl delete -n demo service/minio-nodeport-svc
-kubectl delete -n demo service/minio
-kubectl delete -n demo secret/minio-client-secret
+kubectl delete -n storage secret/minio-server-secret
+kubectl delete -n storage deployment/minio-deployment
+kubectl delete -n storage persistentvolumeclaim/minio-pvc
+kubectl delete -n storage service/minio-nodeport-svc
+kubectl delete -n storage service/minio
+kubectl delete -n storage secret/minio-client-secret
 kubectl delete -n demo pod/osm-pod
 
+kubectl delete ns storage
 kubectl delete ns demo
 ```

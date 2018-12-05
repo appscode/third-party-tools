@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
   name: prometheus
-  namespace: demo
+  namespace: monitoring # use same namespace as ServiceMonitor crd
   labels:
     prometheus: prometheus
 spec:

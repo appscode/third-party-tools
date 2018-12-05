@@ -4,7 +4,7 @@ metadata:
   name: prometheus-config
   labels:
     app: prometheus-demo
-  namespace: demo
+  namespace: monitoring
 data:
   prometheus.yml: |-
     global:

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: demo
+  namespace: monitoring
   labels:
     app: prometheus-demo
 spec:

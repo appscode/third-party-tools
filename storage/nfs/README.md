@@ -8,9 +8,12 @@ This tutorial will show you how to deploy an NFS server in Kubernetes. This tuto
 
 At first, you need to have a Kubernetes cluster, and the `kubectl` command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
 
-To keep things isolated, we will use a separate namespace called `demo` throughout this tutorial.
+To keep NFS resources isolated, we will use a separate namespace called `storage` throughout this tutorial. We will also use another namespace called `demo` to deploy sample workloads.
 
 ```console
+$ kubectl create ns storage
+namespace/storage created
+
 $ kubectl create ns demo
 namespace/demo created
 ```
@@ -30,7 +33,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nfs-server
-  namespace: demo
+  namespace: storage
 spec:
   selector:
     matchLabels:
@@ -82,7 +85,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nfs-service
-  namespace: demo
+  namespace: storage
 spec:
   ports:
   - name: nfs
@@ -105,7 +108,7 @@ service/nfs-service created
 Now, we need to know the IP address of this Service. Run following command to view the IP address.
 
 ```console
-$ kubectl get service -n demo nfs-service
+$ kubectl get service -n storage nfs-service
 NAME          TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
 nfs-service   ClusterIP   10.98.52.204   <none>        2049/TCP,20048/TCP,111/TCP   7s
 ```
@@ -152,13 +155,13 @@ Here, we have mounted `/exports/nfs-direct` directory of NFS server into `/demo/
 At first, let's create `nfs-direct` folder inside `/exports` directory of NFS server.
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv mkdir /exports/shared
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv mkdir /exports/shared
 ```
 
 Verify that directory has been created successfully,
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv ls /exports
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv ls /exports
 index.html
 nfs-direct
 ```
@@ -179,7 +182,7 @@ When the pod is ready, let's create a sample file inside `/demo/data` directory.
 Verify that the file has been stored in the NFS server,
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv ls /exports/nfs-direct
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv ls /exports/nfs-direct
 demo.txt
 ```
 
@@ -212,13 +215,13 @@ spec:
 At first, let's create `pvc` folder inside `/exports` directory of the NFS server.
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv mkdir /exports/pvc
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv mkdir /exports/pvc
 ```
 
 Verify that the directory has been created successfully,
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv ls /exports
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv ls /exports
 index.html
 nfs-direct
 pvc
@@ -313,7 +316,7 @@ $ kubectl exec -n demo nfs-pod-pvc touch /demo/data/demo.txt
 Verify that the file has been stored in the NFS server,
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv ls /exports/pvc
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv ls /exports/pvc
 demo.txt
 ```
 
@@ -326,13 +329,13 @@ Sometimes we need to share some common files (i.e. configuration file) between m
 At first, let's create the directory that we want to share in `/exports` directory of NFS server.
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv mkdir /exports/pvc
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv mkdir /exports/shared
 ```
 
 Verify that the directory has been created successfully,
 
 ```console
-$ kubectl exec -n demo nfs-server-f9c6cbc7f-n85lv ls /exports
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv ls /exports
 index.html
 nfs-direct
 pvc
@@ -423,8 +426,9 @@ kubectl delete -n demo pv/nfs-pv
 
 kubectl delete -n demo pod/nfs-direct
 
-kubectl delete -n demo svc/nfs-service
-kubectl delete -n demo deployment/nfs-server
+kubectl delete -n storage svc/nfs-service
+kubectl delete -n storage deployment/nfs-server
 
+kubectl delete ns storage
 kubectl delete ns demo
 ```

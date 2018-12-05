@@ -12,7 +12,7 @@ spec:
     - name: PROVIDER
       value: s3
     - name: AWS_ENDPOINT
-      value: https://minio.demo.svc
+      value: https://minio.storage.svc
     - name: AWS_ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:

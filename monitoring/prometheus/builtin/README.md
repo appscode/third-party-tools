@@ -6,9 +6,12 @@ Prometheus has native support for monitoring Kubernetes resources. This tutorial
 
 At first, you need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
 
-To keep Prometheus resources isolated, we will use a separate namespace `demo` to deploy Prometheus server.
+To keep Prometheus resources isolated, we will use a separate namespace `monitoring` to deploy Prometheus server. We will deploy sample workload on another separate namespace called `demo`.
 
 ```console
+$ kubectl create ns monitoring
+namespace/monitoring created
+
 $ kubectl create ns demo
 namespace/demo created
 ```
@@ -445,7 +448,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: demo
+  namespace: monitoring
   labels:
     app: prometheus-demo
 spec:
@@ -490,7 +493,7 @@ Prometheus server is running on port `9090`. We will use [port forwarding](https
 At first, let's check if the Prometheus pod is in `Running` state.
 
 ```console
-$ kubectl get pod -n demo -l=app=prometheus
+$ kubectl get pod -n monitoring -l=app=prometheus
 NAME                          READY   STATUS    RESTARTS   AGE
 prometheus-8568c86d86-vpzx5   1/1     Running   0          102s
 ```
@@ -498,7 +501,7 @@ prometheus-8568c86d86-vpzx5   1/1     Running   0          102s
 Now, run following command on a separate terminal to forward `9090` port of `prometheus-8568c86d86-vpzx5` pod,
 
 ```console
-$ kubectl port-forward -n demo prometheus-8568c86d86-vpzx5  9090
+$ kubectl port-forward -n monitoring prometheus-8568c86d86-vpzx5  9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
 ```
@@ -519,6 +522,8 @@ $ kubectl delete all -n demo -l=app=prometheus-demo
 pod "pod-monitoring-demo" deleted
 pod "service-endpoint-monitoring-demo" deleted
 service "pushgateway-service" deleted
+
+$ kubectl delete all -n monitoring -l=app=prometheus-demo
 deployment.apps "prometheus" deleted
 
 # delete rbac stuff
@@ -528,10 +533,13 @@ clusterrole.rbac.authorization.k8s.io "prometheus" deleted
 $ kubectl delete clusterrolebinding -l=app=prometheus-demo
 clusterrolebinding.rbac.authorization.k8s.io "prometheus" deleted
 
-$ kubectl delete serviceaccount -n demo -l=app=prometheus-demo
+$ kubectl delete serviceaccount -n monitoring -l=app=prometheus-demo
 serviceaccount "prometheus" deleted
 
 # delete namespace
+$ kubectl delete ns monitoring
+namespace "monitoring" deleted
+
 $ kubectl delete ns demo
 namespace "demo" deleted
 ```
