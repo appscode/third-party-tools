@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-deployment
+  namespace: storage
+  labels:
+    app: minio
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio
+        args:
+        - server
+        - --address
+        - ":443"
+        - /storage
+        env:
+        # credentials to access minio server. use from secret "minio-server-secret"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-server-secret
+              key: MINIO_ACCESS_KEY
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-server-secret
+              key: MINIO_SECRET_KEY
+        ports:
+        - name: https
+          containerPort: 443
+        volumeMounts:
+        - name: storage # mount the "storage" volume into the pod
+          mountPath: "/storage"
+        - name: minio-certs # mount the certificates in "/root/.minio/certs" directory
+          mountPath: "/root/.minio/certs"
+      volumes:
+      - name: storage # use "minio-pvc" to store data
+        persistentVolumeClaim:
+          claimName: minio-pvc
+      - name: minio-certs # use secret "minio-server-secret" as volume to mount the certificates
+        secret:
+          secretName: minio-server-secret
+          items:
+          - key: public.crt
+            path: public.crt
+          - key: private.key
+            path: private.key
+          - key: public.crt
+            path: CAs/public.crt # mark self signed certificate as trusted

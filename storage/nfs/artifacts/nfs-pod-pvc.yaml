@@ -1,0 +1,19 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nfs-pod-pvc
+  namespace: demo
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command:
+    - sleep
+    - "3600"
+    volumeMounts:
+    - name: data
+      mountPath: /demo/data
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: nfs-pvc
