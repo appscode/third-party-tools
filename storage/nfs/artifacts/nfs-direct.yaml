@@ -16,5 +16,5 @@ spec:
   volumes:
   - name: data
     nfs:
-      server: "10.98.52.204"
+      server: "nfs-service.storage.svc.cluster.local"
       path: "/nfs-direct" # "nfs-direct" folder must exist inside "/exports" directory of NFS server

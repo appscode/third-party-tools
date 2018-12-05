@@ -18,6 +18,36 @@ $ kubectl create ns demo
 namespace/demo created
 ```
 
+**Add Kubernetes cluster's DNS in host's `resolved.conf` :**
+
+There is an [issue](https://github.com/kubernetes/minikube/issues/2218) that prevents accessing NFS server through Service DNS. However, accessing through IP address works fine. If you face this issue, you have to add IP address of `kube-dns` Service into your host's `/etc/systemd/resolved.conf` and restart `systemd-networkd`, `systemd-resolved`.
+
+We are using Minikube for this tutorial. Below steps show how we can do this in Minikube.
+
+1. Get IP address of `kube-dns` Service.
+    ```console
+    $ kubectl get service -n kube-system kube-dns
+    NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+    kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP   173m
+    ```
+    Look at the `CLUSTER-IP` field. Here, `10.96.0.10` is the IP address of `kube-dns` service.
+
+2. Add the IP address into `/etc/systemd/resolved.conf` file of Minikube and restart networking stuff.
+   ```console
+   # Login to minikube
+   $ minikube ssh
+   # Run commands as root
+   $ su
+   # Add IP address in `/etc/systemd/resolved.conf` file
+   $ echo "DNS=10.96.0.10" >> /etc/systemd/resolved.conf
+   # Restart netwokring stuff
+   $ systemctl daemon-reload
+   $ systemctl restart systemd-networkd
+   $ systemctl restart systemd-resolved
+   ````
+
+Now, we will be able to acccess NFS server using DNS of a Service i.e. `{service name}.{namespace}.svc.cluster.local`.
+
 ## Deploy NFS Server
 
 We will deploy NFS server using a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). We will configure our NFS server to store data in [hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath). You can use any cloud volume such as [awsElasticBlockStore](https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore), [azureDisk](https://kubernetes.io/docs/concepts/storage/volumes/#azuredisk), [gcePersistentDisk](https://kubernetes.io/docs/concepts/storage/volumes/#gcepersistentdisk) etc.
@@ -76,7 +106,7 @@ deployment.apps/nfs-server created
 
 **Create Service :**
 
-As we have deployed the NFS server using a Deployment, server IP address can change in case of pod restart. So, we need a stable IP address so that our apps can consume the volume using that IP. We will create a Service for purpose.
+As we have deployed the NFS server using a Deployment, server IP address can change in case of pod restart. So, we need a stable DNS/IP address so that our apps can consume the volume using it. We will create a Service for purpose.
 
 Below is the YAML for the Service we are going to create for our NFS server.
 
@@ -105,15 +135,9 @@ $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/
 service/nfs-service created
 ```
 
-Now, we need to know the IP address of this Service. Run following command to view the IP address.
+Now, we can access the NFS server using `nfs-service.storage.svc.cluster.local` dns.
 
-```console
-$ kubectl get service -n storage nfs-service
-NAME          TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
-nfs-service   ClusterIP   10.98.52.204   <none>        2049/TCP,20048/TCP,111/TCP   7s
-```
-
-Look at the `CLUSTER-IP` field. Here, `10.98.52.204` is the IP address for this Service. We can use this IP address to connect with the NFS server from inside the cluster. If you want to access the NFS server from outside of the cluster, you have to create [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) or [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer) type Service.
+>If you want to access the NFS server from outside of the cluster, you have to create [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) or [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer) type Service.
 
 ## Use NFS Volume
 
@@ -144,7 +168,7 @@ spec:
   volumes:
   - name: data
     nfs:
-      server: "10.98.52.204"
+      server: "nfs-service.storage.svc.cluster.local"
       path: "/nfs-direct" # "nfs-direct" folder must exist inside "/exports" directory of NFS server
 ```
 
@@ -206,7 +230,7 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: "10.98.52.204"
+    server: "nfs-service.storage.svc.cluster.local"
     path: "/pvc" # "pvc" folder must exist in "/exports" directory of NFS server
 ```
 
@@ -367,7 +391,7 @@ spec:
   volumes:
   - name: data
     nfs:
-      server: "10.98.52.204"
+      server: "nfs-service.storage.svc.cluster.local"
       path: "/shared" # "shared" folder must exist inside "/exports" directory of NFS server
 ```
 

@@ -9,5 +9,5 @@ spec:
   accessModes:
     - ReadWriteMany
   nfs:
-    server: "10.98.52.204"
+    server: "nfs-service.storage.svc.cluster.local"
     path: "/pvc" # "pvc" folder must exist in "/exports" directory of NFS server
