@@ -1,6 +1,6 @@
 # Deploying NFS Server in Kubernetes
 
-Kubernetes supports NFS (Network File System) to mount as volume in a pod. An [nfs](https://kubernetes.io/docs/concepts/storage/volumes/#nfs) volume provides persistent storage for pods. You can also pre-populate an `nfs` volume. An `nfs` volume can be shared between pods. It is particularly helpful when you need some files to be shared between multiple pods.
+NFS (Network File System) volumes can be mounted(https://kubernetes.io/docs/concepts/storage/volumes/#nfs) as a `PersistentVolume` in Kubernetes pods. You can also pre-populate an `nfs` volume. An `nfs` volume can be shared between pods. It is particularly helpful when you need some files to be writable between multiple pods.
 
 This tutorial will show you how to deploy an NFS server in Kubernetes. This tutorial also shows you how to use `nfs` volume in a pod.
 
@@ -20,7 +20,7 @@ namespace/demo created
 
 **Add Kubernetes cluster's DNS in host's `resolved.conf` :**
 
-There is an [issue](https://github.com/kubernetes/minikube/issues/2218) that prevents accessing NFS server through Service DNS. However, accessing through IP address works fine. If you face this issue, you have to add IP address of `kube-dns` Service into your host's `/etc/systemd/resolved.conf` and restart `systemd-networkd`, `systemd-resolved`.
+There is an [issue](https://github.com/kubernetes/minikube/issues/2218) that prevents accessing NFS server through service DNS. However, accessing through IP address works fine. If you face this issue, you have to add IP address of `kube-dns` Service into your host's `/etc/systemd/resolved.conf` and restart `systemd-networkd`, `systemd-resolved`.
 
 We are using Minikube for this tutorial. Below steps show how we can do this in Minikube.
 
@@ -46,11 +46,11 @@ We are using Minikube for this tutorial. Below steps show how we can do this in 
    $ systemctl restart systemd-resolved
    ````
 
-Now, we will be able to acccess NFS server using DNS of a Service i.e. `{service name}.{namespace}.svc.cluster.local`.
+Now, we will be able to access NFS server using DNS of a Service i.e. `{service name}.{namespace}.svc.cluster.local`.
 
 ## Deploy NFS Server
 
-We will deploy NFS server using a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). We will configure our NFS server to store data in [hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath). You can use any cloud volume such as [awsElasticBlockStore](https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore), [azureDisk](https://kubernetes.io/docs/concepts/storage/volumes/#azuredisk), [gcePersistentDisk](https://kubernetes.io/docs/concepts/storage/volumes/#gcepersistentdisk) etc.
+We will deploy NFS server using a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/). We will configure our NFS server to store data in [hostPath](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath). You can also use any cloud volume such as [awsElasticBlockStore](https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore), [azureDisk](https://kubernetes.io/docs/concepts/storage/volumes/#azuredisk), [gcePersistentDisk](https://kubernetes.io/docs/concepts/storage/volumes/#gcepersistentdisk) etc as a persistent store for NFS server.
 
 Then, we will create a [Service](https://kubernetes.io/docs/concepts/services-networking/service/) for this NFS server so that pods can consume `nfs` volume using this Service.
 
@@ -106,9 +106,9 @@ deployment.apps/nfs-server created
 
 **Create Service :**
 
-As we have deployed the NFS server using a Deployment, server IP address can change in case of pod restart. So, we need a stable DNS/IP address so that our apps can consume the volume using it. We will create a Service for purpose.
+As we have deployed the NFS server using a Deployment, the server IP address can change in case of pod restart. So, we need a stable DNS/IP address so that our apps can consume the volume using it. So, we are going to create a `Service` for NFS server pods.
 
-Below is the YAML for the Service we are going to create for our NFS server.
+Below is the YAML for the `Service` we are going to create for our NFS server.
 
 ```yaml
 apiVersion: v1
@@ -128,14 +128,14 @@ spec:
     app: nfs-server # must match with the label of NFS pod
 ```
 
-Let's create the Service we have shown above,
+Let's create the service we have shown above,
 
 ```console
 $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/storage/nfs/artifacts/nfs-service.yaml
 service/nfs-service created
 ```
 
-Now, we can access the NFS server using `nfs-service.storage.svc.cluster.local` dns.
+Now, we can access the NFS server using `nfs-service.storage.svc.cluster.local` domain name.
 
 >If you want to access the NFS server from outside of the cluster, you have to create [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#nodeport) or [LoadBalancer](https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer) type Service.
 
@@ -212,7 +212,7 @@ demo.txt
 
 ### Use NFS volume through PVC
 
-You can also use the NFS volume through `PersistentVolumeVlaims`. You have to create a `PersistentVolume` that will hold the information about NFS server. Then, you have to create a `PersistentVolumeVlaims` that will be bounded with the `PersistentVolume`. Finally, you can mount the PVC into a pod.
+You can also use the NFS volume through a `PersistentVolumeClaim`. You have to create a `PersistentVolume` that will hold the information about NFS server. Then, you have to create a `PersistentVolumeClaim` that will be bounded with the `PersistentVolume`. Finally, you can mount the PVC into a pod.
 
 **Create PersistentVolume :**
 
@@ -223,7 +223,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: nfs-pv
-  namespace: demo
+  labels:
+    app: nfs-data
 spec:
   capacity:
     storage: 1Gi
@@ -258,11 +259,11 @@ $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/
 persistentvolume/nfs-pv created
 ```
 
-**Create PersistentVolumeVlaims :**
+**Create a PersistentVolumeClaim:**
 
-Now, we have to create a `PersistentVolumeVlaims`. This PVC will be bounded with the `PersistentVolume` we have created above.
+Now, we have to create a `PersistentVolumeClaim`. This PVC will be bounded with the `PersistentVolume` we have created above.
 
-Below is the YAML for the `PersistentVolumeVlaims` that we are going to create,
+Below is the YAML for the `PersistentVolumeClaim` that we are going to create,
 
 ```yaml
 apiVersion: v1
@@ -277,6 +278,12 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      app: nfs-data
+  selector:
+    matchLabels:
+      app: nfs-data
 ```
 
 Let's create the PVC we have shown above,
@@ -286,7 +293,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/
 persistentvolumeclaim/nfs-pvc created
 ```
 
-Verify that the `PersistentVolumeVlaims` has been bounded with the `PersistentVolume`.
+Verify that the `PersistentVolumeClaim` has been bounded with the `PersistentVolume`.
 
 ```console
 $ kubectl get pvc -n demo nfs-pvc
@@ -348,7 +355,7 @@ demo.txt
 
 Sometimes we need to share some common files (i.e. configuration file) between multiple pods. We can easily achieve it using a shared NFS volume. This section will show you how to we can share a common directory between multiple pods.
 
-**Create Shared Directory :**
+**Create a Shared Directory :**
 
 At first, let's create the directory that we want to share in `/exports` directory of NFS server.
 
@@ -434,7 +441,7 @@ file-1.txt
 file-2.txt
 ```
 
-So, we can see from above that any change in `/demo/data` directory of any pod is instantly reflected on other pod.
+So, we can see from above that any change in `/demo/data` directory of one pod is instantly reflected on the other pod.
 
 ## Cleanup
 

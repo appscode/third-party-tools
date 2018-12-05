@@ -40,7 +40,7 @@ This will create two files `ca.crt` and `ca.key` in your working directory. This
 
 Now, we will generate server certificate using the root certificate. Now, we have to provide the `domain` or `ip address` for which this certificate will be valid.
 
-We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `storage` namespace. So, our domain will be `minio.storage.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As we are using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.storage.svc` domain and `198.168.99.100` ip address.
+We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `storage` namespace. So, our domain will be `minio.storage.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As we are using minikube, it is `192.168.99.100` (run `minikube ip` to confirm). We will create a certificate that is valid for both `minio.storage.svc` domain and `198.168.99.100` ip address.
 
 Let's create server certificates,
 
@@ -63,7 +63,7 @@ $ cat {server.crt,ca.crt} > public.crt
 $ cat server.key > private.key
 ```
 
-Be careful about the order of `server.crt`  and `ca.crt`. The order will be `server's certificate > intermediate certificates > CA's root certificate`. The intermediate certificates are required if the server certificate is created using a certificate which is not the root certificate but signed by the root certificate. [onessl](https://github.com/kubepack/onessl) use root certificate by default to generate server certificate if no certificate path is specified by `--cert-dir` flag. Hence, the intermediate certificates are not required here.
+Be careful about the order of `server.crt`  and `ca.crt`. The order will be `server's certificate > intermediate certificates > CA's root certificate`. The intermediate certificates are required if the server certificate is created using a certificate which is not the root certificate but signed by the root certificate. [onessl](https://github.com/kubepack/onessl) use root certificate by default to generate server certificate if no certificate path is specified by `--cert-dir` flag. Hence, the intermediate certificates are not used here.
 
 We will create a Kubernetes secret with this `public.crt` and `private.key` files and mount the secret to `/root/.minio/certs/` directory of minio container.
 
@@ -324,7 +324,11 @@ For `s3` compatible Minio server, we have to provide following connection inform
 Let's create a `osm` configuration named `minio` for our Minio server.
 
 ```console
-$ osm config set-context minio --provider=s3 --s3.access_key_id=my-access-key --s3.secret_key=my-secret-key --s3.endpoint=https://192.168.99.100:32733 --s3.cacert_file=./ca.crt
+$ osm config set-context minio --provider=s3 \
+  --s3.access_key_id=my-access-key \
+  --s3.secret_key=my-secret-key \
+  --s3.endpoint=https://192.168.99.100:32733 \
+  --s3.cacert_file=./ca.crt
 ```
 
 Check that `osm` has set this newly created configuration as it's current context,
