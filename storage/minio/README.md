@@ -40,7 +40,7 @@ This will create two files `ca.crt` and `ca.key` in your working directory. This
 
 Now, we will generate server certificate using the root certificate. Now, we have to provide the `domain` or `ip address` for which this certificate will be valid.
 
-We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `storage` namespace. So, our domain will be `minio.storage.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As I am using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.storage.svc` domain and `198.168.99.100` ip address.
+We want to access Minio server both from inside and outside the cluster. In order to access Minio from inside the cluster, we will use a service named `minio` in `storage` namespace. So, our domain will be `minio.storage.svc`. To access Minio from outside of cluster through `NodePort`, we will require Cluster's IP address. As we are using minikube, it is `192.168.99.100`. We will create a certificate that is valid for both `minio.storage.svc` domain and `198.168.99.100` ip address.
 
 Let's create server certificates,
 
@@ -305,7 +305,7 @@ NAME                 TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)         A
 minio-nodeport-svc   NodePort   10.108.252.121   <none>        443:32733/TCP   6m53s
 ```
 
-Notice the `PORT(S)` field. Here, `32733` is the allocated `NodePort` for this service. Now, we can connect to Minio server using `https://<cluster ip>:32733` url. As I am using minikube for this tutorial, my cluster ip is `192.168.99.100`. I have already used this IP address while generating self-signed certificate to make it valid for this IP.
+Notice the `PORT(S)` field. Here, `32733` is the allocated `NodePort` for this service. Now, we can connect to Minio server using `https://<cluster ip>:32733` url. As we are using minikube for this tutorial, the cluster ip is `192.168.99.100`. We have already used this IP address while generating self-signed certificate to make it valid for this IP.
 
 **Connect with Minio Server :**
 
