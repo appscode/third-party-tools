@@ -305,7 +305,7 @@ NAME                 TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)         A
 minio-nodeport-svc   NodePort   10.108.252.121   <none>        443:32733/TCP   6m53s
 ```
 
-Notice the `PORT(S)` field. Here, `32733` is the allocated `NodePort` for this service. Now, we can connect to Minio server using `https://<cluster ip>:32733` url. As we are using minikube for this tutorial, the cluster ip is `192.168.99.100`. We have already used this IP address while generating self-signed certificate to make it valid for this IP.
+Notice the `PORT(S)` field. Here, `32733` is the allocated `NodePort` for this service. Now, we can connect to Minio server using `https://<Node IP>:32733` url. As we are using minikube for this tutorial, the Node IP is `192.168.99.100`. We have already used this IP address while generating self-signed certificate to make it valid for this IP.
 
 **Connect with Minio Server :**
 
