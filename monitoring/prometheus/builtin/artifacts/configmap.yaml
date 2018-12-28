@@ -40,7 +40,7 @@ data:
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: kubernetes_pod_name
-    
+
     #-------------- configuration to collect metrics from service endpoints -----------------------
     - job_name: 'kubernetes-service-endpoints'
       honor_labels: true
@@ -70,7 +70,7 @@ data:
       - source_labels: [__meta_kubernetes_service_name]
         action: replace
         target_label: kubernetes_name
-    
+
     #---------------- configuration to collect metrics from kubernetes apiserver -------------------------
     - job_name: 'kubernetes-apiservers'
       honor_labels: true
@@ -88,7 +88,7 @@ data:
       - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
         action: keep
         regex: default;kubernetes;https
-    
+
     #--------------- configuration to collect metrics from nodes -----------------------
     - job_name: 'kubernetes-nodes'
       honor_labels: true
