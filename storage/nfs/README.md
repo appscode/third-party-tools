@@ -179,7 +179,7 @@ Here, we have mounted `/exports/nfs-direct` directory of NFS server into `/demo/
 At first, let's create `nfs-direct` folder inside `/exports` directory of NFS server.
 
 ```console
-$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv mkdir /exports/shared
+$ kubectl exec -n storage nfs-server-f9c6cbc7f-n85lv mkdir /exports/nfs-direct
 ```
 
 Verify that directory has been created successfully,
