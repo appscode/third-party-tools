@@ -281,9 +281,6 @@ spec:
   selector:
     matchLabels:
       app: nfs-data
-  selector:
-    matchLabels:
-      app: nfs-data
 ```
 
 Let's create the PVC we have shown above,
