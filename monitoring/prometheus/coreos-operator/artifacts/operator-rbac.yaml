@@ -19,6 +19,11 @@ rules:
   - prometheusrules
   verbs: ["*"]
 - apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - podmonitors
+  verbs: ["list", "watch"]
+- apiGroups:
   - apps
   resources:
   - statefulsets
