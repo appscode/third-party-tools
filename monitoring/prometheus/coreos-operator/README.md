@@ -168,8 +168,24 @@ To clean up the Kubernetes resources created by this tutorial, run:
 ```console
 # cleanup Prometheus resources
 kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus.yaml
+prometheus.monitoring.coreos.com "prometheus" deleted
 kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus-rbac.yaml
+clusterrole.rbac.authorization.k8s.io "prometheus" deleted
+serviceaccount "prometheus" deleted
+clusterrolebinding.rbac.authorization.k8s.io "prometheus" deleted
 
 # cleanup Prometheus operator resources
 kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/release-0.41/bundle.yaml
+customresourcedefinition.apiextensions.k8s.io "alertmanagers.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "podmonitors.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "probes.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "prometheuses.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "prometheusrules.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "servicemonitors.monitoring.coreos.com" deleted
+customresourcedefinition.apiextensions.k8s.io "thanosrulers.monitoring.coreos.com" deleted
+clusterrolebinding.rbac.authorization.k8s.io "prometheus-operator" deleted
+clusterrole.rbac.authorization.k8s.io "prometheus-operator" deleted
+deployment.apps "prometheus-operator" deleted
+serviceaccount "prometheus-operator" deleted
+service "prometheus-operator" deleted
 ```
