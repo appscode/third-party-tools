@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
   name: prometheus
-  namespace: monitoring # use same namespace as ServiceMonitor crd
   labels:
     prometheus: prometheus
 spec:
@@ -10,7 +9,10 @@ spec:
   serviceAccountName: prometheus
   serviceMonitorSelector:
     matchLabels:
-      k8s-app: prometheus # change this according to your setup
+      k8s-app: prometheus
+  serviceMonitorNamespaceSelector:
+    matchLabels:
+      prometheus: prometheus
   resources:
     requests:
       memory: 400Mi
