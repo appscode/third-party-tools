@@ -6,7 +6,7 @@ This repository is intended to hold the common third-party tools we used accross
 
 - Monitoring
     - [Configure Prometheus Server to Monitor Kubernetes Resources](/monitoring/prometheus/builtin/README.md)
-    - [Deploy CoreOS Prometheus Operator](/monitoring/prometheus/coreos-operator/README.md).
+    - [Deploy Prometheus Operator](/monitoring/prometheus/operator/README.md).
     - [Deploy Grafana Dashboard](/monitoring/grafana/README.md)
 - Storage
     - [Deploy TLS Secured Minio Server in Kubernetes](/storage/minio/README.md)

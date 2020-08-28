@@ -1,6 +1,6 @@
-# Deploy CoreOS Prometheus Operator
+# Deploy Prometheus Operator
 
-CoreOS [prometheus-operator](https://github.com/coreos/prometheus-operator) provides simple and Kubernetes native ways to deploy and configure the Prometheus server. This tutorial will show you how to deploy CoreOS prometheus-operator. You can also follow the official docs to deploy Prometheus operator from [here](https://github.com/coreos/prometheus-operator/blob/master/Documentation/user-guides/getting-started.md).
+[Prometheus operator](https://github.com/prometheus-operator/prometheus-operator) provides simple and Kubernetes native ways to deploy and configure the Prometheus server. This tutorial will show you how to deploy CoreOS prometheus-operator. You can also follow the official docs to deploy Prometheus operator from [here](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/user-guides/getting-started.md).
 
 ## Deploy Prometheus Operator
 
@@ -35,7 +35,7 @@ prometheus-operator-7589597769-gp46z   1/1     Running   0          6m13s
 
 ## Deploy Prometheus Server
 
-To deploy the Prometheus server, we have to create [Prometheus](https://github.com/coreos/prometheus-operator/blob/master/Documentation/design.md#prometheus) cr. Prometheus cr defines a desired Prometheus server setup. It specifies which [ServiceMonitor](https://github.com/coreos/prometheus-operator/blob/master/Documentation/design.md#servicemonitor)'s should be covered by this Prometheus instance. ServiceMonitor cr defines a set of services that should be monitored dynamically.
+To deploy the Prometheus server, we have to create [Prometheus](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#prometheus) cr. Prometheus cr defines a desired Prometheus server setup. It specifies which [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#servicemonitor)'s should be covered by this Prometheus instance. ServiceMonitor cr defines a set of services that should be monitored dynamically.
 
 Prometheus operator watches for `Prometheus` cr. Once a `Prometheus` cr is created, prometheus operator generates respective configuration (`prometheus.yaml` file) and creates a StatefulSet to run the desired Prometheus server.
 
@@ -92,7 +92,7 @@ subjects:
 Let's create the following RBAC resources for Prometheus cr.
 
 ```console
-$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus-rbac.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus-rbac.yaml
 clusterrole.rbac.authorization.k8s.io/prometheus created
 serviceaccount/prometheus created
 clusterrolebinding.rbac.authorization.k8s.io/prometheus created
@@ -131,7 +131,7 @@ This Prometheus cr will select all `ServiceMonitor` that meet up the below condi
 Let's create the `Prometheus` cr we have shown above,
 
 ```console
-$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus.yaml
 prometheus.monitoring.coreos.com/prometheus created
 ```
 
@@ -167,8 +167,8 @@ To clean up the Kubernetes resources created by this tutorial, run:
 
 ```console
 # cleanup Prometheus resources
-kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus.yaml
-kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/coreos-operator/artifacts/prometheus-rbac.yaml
+kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus.yaml
+kubectl delete -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus-rbac.yaml
 
 # cleanup Prometheus operator resources
 kubectl delete -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/release-0.41/bundle.yaml
