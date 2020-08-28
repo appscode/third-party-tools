@@ -35,16 +35,16 @@ prometheus-operator-7589597769-gp46z   1/1     Running   0          6m13s
 
 ## Deploy Prometheus Server
 
-To deploy the Prometheus server, we have to create [Prometheus](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#prometheus) cr. Prometheus cr defines a desired Prometheus server setup. It specifies which [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#servicemonitor)'s should be covered by this Prometheus instance. ServiceMonitor cr defines a set of services that should be monitored dynamically.
+To deploy the Prometheus server, we have to create [Prometheus](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#prometheus) custom resource. Prometheus custom resource defines a desired Prometheus server setup. It specifies which [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/design.md#servicemonitor)'s should be covered by this Prometheus instance. ServiceMonitor custom resource defines a set of services that should be monitored dynamically.
 
-Prometheus operator watches for `Prometheus` cr. Once a `Prometheus` cr is created, prometheus operator generates respective configuration (`prometheus.yaml` file) and creates a StatefulSet to run the desired Prometheus server.
+Prometheus operator watches for `Prometheus` custom resource. Once a `Prometheus` custom resource is created, prometheus operator generates respective configuration (`prometheus.yaml` file) and creates a StatefulSet to run the desired Prometheus server.
 
 #### Create RBAC
 
-We assumed that our cluster is RBAC enabled.  Below is the YAML of RBAC resources for Prometheus cr that we are going to create,
+We assumed that our cluster is RBAC enabled.  Below is the YAML of RBAC resources for Prometheus custom resource that we are going to create,
 
 <details>
-<summary>RBAC resources for Prometheus cr</summary>
+<summary>RBAC resources for Prometheus custom resource</summary>
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -89,7 +89,7 @@ subjects:
 </details>
 <br>
 
-Let's create the following RBAC resources for Prometheus cr.
+Let's create the following RBAC resources for Prometheus custom resource.
 
 ```console
 $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus-rbac.yaml
@@ -100,7 +100,7 @@ clusterrolebinding.rbac.authorization.k8s.io/prometheus created
 
 #### Create Prometheus CR
 
-Below is the YAML of `Prometheus` cr that we are going to create for this tutorial,
+Below is the YAML of `Prometheus` custom resource that we are going to create for this tutorial,
 
 ```yaml
 apiVersion: monitoring.coreos.com/v1
@@ -123,12 +123,12 @@ spec:
       memory: 400Mi
 ```
 
-This Prometheus cr will select all `ServiceMonitor` that meet up the below conditions:
+This Prometheus custom resource will select all `ServiceMonitor` that meet up the below conditions:
 
 - `ServiceMonitor` will have the `k8s-app: prometheus` label.
 - `ServiceMonitor` will be created in that namespaces which have `prometheus: prometheus` label.
 
-Let's create the `Prometheus` cr we have shown above,
+Let's create the `Prometheus` custom resource we have shown above,
 
 ```console
 $ kubectl apply -f https://raw.githubusercontent.com/appscode/third-party-tools/master/monitoring/prometheus/operator/artifacts/prometheus.yaml
