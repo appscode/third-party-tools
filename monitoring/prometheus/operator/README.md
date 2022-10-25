@@ -47,7 +47,7 @@ We assumed that our cluster is RBAC enabled.  Below is the YAML of RBAC resource
 <summary>RBAC resources for Prometheus custom resource</summary>
 
 ```yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: prometheus
@@ -73,7 +73,7 @@ metadata:
   name: prometheus
   namespace: default
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: prometheus
